@@ -2,7 +2,6 @@
 
 A modern messaging platform that gives you full control over your data. Built to be open, secure, private, and resilient. Pong! is ideal for personal use, small teams, and anyone who values privacy and autonomy.
 
-🚀 Key Features
 # 💾 Fully Self-Hosted
 
 Can be deployed on any server you control.
