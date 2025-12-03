@@ -1,30 +1,30 @@
 # 🌐 Pong! – Self-Hosted Secure Messenger
 
-A modern messaging platform that gives you full control over your data. Built to be open, secure, private, and resilient. Pong! is ideal for personal use, small teams, and anyone who values privacy and autonomy.
+Pong! is a simple self-hosted messenger that focuses on privacy and control over your data. The project uses open technologies, supports encryption, and can run on any server you manage.
 
 # 💾 Fully Self-Hosted
 
 Can be deployed on any server you control.
 
-Works independently of centralized services.
+Works without relying on centralized services.
 
-Practically unblockable: since you host it yourself, no third party can shut it down.
+Hard to block, since all infrastructure belongs to the user.
 
 # 🔐 End-to-End Encryption
 
-Each user has a public/private key pair.
+Each user has their own public/private key pair.
 
-Messages are encrypted with the recipient’s public key and can only be decrypted with their private key.
+Messages are encrypted with the recipient’s public key and decrypted only on their device.
 
-Even if traffic is intercepted, message contents remain inaccessible.
+Intercepted traffic does not reveal message contents.
 
-# 🗄 Multi-Server Database Synchronization
+🗄 Multi-Server Database Synchronization
 
-Supports syncing your database with other servers.
+Supports synchronization between multiple servers.
 
-Allows building a distributed network of synced nodes.
+Allows creating a distributed network of instances.
 
-Useful for team setups, backups, or multi-location hosting.
+Useful for backups, redundancy, or multi-location setups.
 
 # 🛠 Roadmap
 
@@ -38,4 +38,4 @@ Improved database replication
 
 # 🙌 Contributing
 
-Pull Requests, ideas, and feedback are welcome.
+Pull requests, suggestions, and feedback are welcome.
