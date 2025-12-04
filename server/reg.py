@@ -33,7 +33,7 @@ def register(data: RegisterData):
 
     # email operations are in development now
     # code = generate_code()
-    # add_code(user_id, code, minutes_valid=10)  # код подтверждения email 10 минут
+    # add_code(user_id, code, minutes_valid=10)
     # send_email(data.email, "Pong! Email confirming", f"Ping!\nHere's your email confirming code: {code}\nPong!")
 
     return {"status": "ok", "message": "Registration successful! Check your email to confirm it!"}
