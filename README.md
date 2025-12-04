@@ -32,8 +32,6 @@ Group chats
 
 Voice messages
 
-Offline mode
-
 Improved database replication
 
 # 🙌 Contributing
