@@ -18,7 +18,7 @@ Messages are encrypted with the recipient’s public key and decrypted only on t
 
 Intercepted traffic does not reveal message contents.
 
-🗄 Multi-Server Database Synchronization
+# 🗄 Multi-Server Database Synchronization
 
 Supports synchronization between multiple servers.
 
