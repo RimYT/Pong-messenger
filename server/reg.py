@@ -1,16 +1,18 @@
-from fastapi import FastAPI, HTTPException, Form
+from fastapi import APIRouter, FastAPI, HTTPException, Form
 from pydantic import BaseModel, EmailStr
 from passlib.hash import bcrypt_sha256
 from datetime import datetime
 from db import init_db, add_user, get_user_by_username, exists_username, exists_email, confirm_email, add_code, get_latest_code
-
 from handlers.email_handler import send_email, generate_code
 
-app = FastAPI()
+import jwt
+from __init__ import SERVER_PRIVATE_KEY, SERVER_PUBLIC_KEY_PEM
+
+router = APIRouter()
 init_db()
 
 # ------------------------------
-# Registration data nodel
+# Registration data model
 # ------------------------------
 class RegisterData(BaseModel):
     username: str
@@ -18,30 +20,40 @@ class RegisterData(BaseModel):
     nickname: str
     email: EmailStr
 
+
 # ------------------------------
-# Register
+# Register endpoint with JWT + public key
 # ------------------------------
-@app.post("/register")
+@router.post("/register")
 def register(data: RegisterData):
     if exists_username(data.username):
         raise HTTPException(400, "This username has already been taken")
-    # if exists_email(data.email):
-    #    raise HTTPException(400, "This email has already been taken")
+    if exists_email(data.email):
+        raise HTTPException(400, "This email has already been taken")
 
     pass_hash = bcrypt_sha256.hash(data.password)
     user_id = add_user(data.username, pass_hash, data.nickname, data.email)
 
-    # email operations are in development now
-    # code = generate_code()
-    # add_code(user_id, code, minutes_valid=10)
-    # send_email(data.email, "Pong! Email confirming", f"Ping!\nHere's your email confirming code: {code}\nPong!")
+    # Create signed JWT token
+    token_payload = {
+        "user_id": user_id,
+        "username": data.username,
+        "iat": datetime.utcnow().timestamp()
+    }
+    token = jwt.encode(token_payload, SERVER_PRIVATE_KEY, algorithm="RS256")
 
-    return {"status": "ok", "message": "Registration successful! Check your email to confirm it!"}
+    return {
+        "status": "ok",
+        "message": "Registration successful! Check your email to confirm it!",
+        "token": token,
+        "public_key": SERVER_PUBLIC_KEY_PEM
+    }
+
 
 # ------------------------------
 # Confirming email
 # ------------------------------
-@app.post("/confirm_email")
+@router.post("/confirm_email")
 def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
     user = get_user_by_username(username)
     if not user:
@@ -61,10 +73,11 @@ def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
     confirm_email(user_id)
     return {"status": "ok", "message": "Email has been confirmed!"}
 
+
 # ------------------------------
-# Auth + 2FA
+# Login + JWT
 # ------------------------------
-@app.post("/login")
+@router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
     user = get_user_by_username(username)
     if not user:
@@ -76,14 +89,25 @@ def login(username: str = Form(...), password: str = Form(...)):
     # if not email_confirmed:
     #    raise HTTPException(400, "Email is not confirmed")
 
-    # email operations are in development now
-    # code = generate_code()
-    # add_code(user_id, code, minutes_valid=5)
-    # send_email(email, "2FA", f"Your code: {code}")
+    token_payload = {
+        "user_id": user_id,
+        "username": username,
+        "iat": datetime.utcnow().timestamp()
+    }
+    token = jwt.encode(token_payload, SERVER_PRIVATE_KEY, algorithm="RS256")
 
-    return {"status": "ok", "message": "You have been logged in"}
+    return {
+        "status": "ok",
+        "message": "You have been logged in",
+        "token": token,
+        "public_key": SERVER_PUBLIC_KEY_PEM
+    }
 
-@app.post("/verify_2fa")
+
+# ------------------------------
+# Verify 2FA + JWT
+# ------------------------------
+@router.post("/verify_2fa")
 def verify_2fa(username: str = Form(...), code: str = Form(...)):
     user = get_user_by_username(username)
     if not user:
@@ -100,5 +124,16 @@ def verify_2fa(username: str = Form(...), code: str = Form(...)):
     if code != db_code:
         raise HTTPException(400, "Invalid 2FA code")
 
-    return {"status": "ok", "message": "You have been logged in"}
+    token_payload = {
+        "user_id": user_id,
+        "username": username,
+        "iat": datetime.utcnow().timestamp()
+    }
+    token = jwt.encode(token_payload, SERVER_PRIVATE_KEY, algorithm="RS256")
 
+    return {
+        "status": "ok",
+        "message": "You have been logged in",
+        "token": token,
+        "public_key": SERVER_PUBLIC_KEY_PEM
+    }
