@@ -1,2 +1,6 @@
 my_secrets.py
 venv\
+server_private_key.pem
+server_public_key.pem
+users.db
+client\Android\
