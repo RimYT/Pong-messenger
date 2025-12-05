@@ -1,1 +1,12 @@
-# wait for updates
+from fastapi import FastAPI
+from reg import router as reg_router
+
+from __init__ import SERVER_PUBLIC_KEY_PEM
+
+app = FastAPI()
+
+app.include_router(reg_router)
+
+@app.post("/ping-pong")
+def ping_pong():
+    return {"status": "ok", "message": "pong-ping!", "token": "null", "public_key": SERVER_PUBLIC_KEY_PEM}
