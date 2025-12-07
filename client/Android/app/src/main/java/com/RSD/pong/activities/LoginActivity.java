@@ -87,9 +87,11 @@ public class LoginActivity extends AppCompatActivity {
                     LoginServerResponse body = response.body();
 
                     try {
+                        //getting tokens
                         String access = body.access_token;
                         String refresh = body.refresh_token;
 
+                        //creating account
                         AccountHandler.createAccount(
                                 LoginActivity.this,
                                 username,
@@ -107,6 +109,7 @@ public class LoginActivity extends AppCompatActivity {
 
                 } else {
                     try {
+                        //printing error message
                         String err = response.errorBody().string();
                         JSONObject json = new JSONObject(err);
                         String detail = json.optString("detail", "Unknown error");
@@ -130,9 +133,7 @@ public class LoginActivity extends AppCompatActivity {
         // TODO: переход в основной экран
     }
 
-    // ------------------------------
-    // IP input
-    // ------------------------------
+    //IP input
     private void reInputIp() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter server IP");

@@ -3,9 +3,7 @@ from datetime import datetime, timedelta
 
 DB_NAME = "users.db"
 
-# ------------------------------
-# Initializing database
-# ------------------------------
+# initializing database
 def init_db():
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -14,6 +12,7 @@ def init_db():
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE,
         pass_hash TEXT,
+        public_key TEXT,
         nickname TEXT,
         email TEXT UNIQUE,
         email_confirmed INTEGER DEFAULT 0
@@ -40,9 +39,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ------------------------------
-# Adding user
-# ------------------------------
+# adding user
 def add_user(username, pass_hash, nickname, email):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -55,9 +52,20 @@ def add_user(username, pass_hash, nickname, email):
     conn.close()
     return user_id
 
-# ------------------------------
-# Get user bt using username
-# ------------------------------
+def add_public_to_user(user_id: int, public_key: str) -> bool:
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        cur = conn.cursor()
+        cur.execute("UPDATE users SET public_key = ? WHERE id = ?", (public_key, user_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print("Error adding public key:", e)
+        return False
+
+
+# get user by using username
 def get_user_by_username(username):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -66,9 +74,7 @@ def get_user_by_username(username):
     conn.close()
     return row  # (id, pass_hash, email_confirmed, email)
 
-# ------------------------------
-# Has the username/email already been taken?
-# ------------------------------
+# has the username/email already been taken?
 def exists_username(username):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -85,9 +91,7 @@ def exists_email(email):
     conn.close()
     return result
 
-# ------------------------------
-# Confirming email
-# ------------------------------
+# confirming email
 def confirm_email(user_id):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
@@ -95,9 +99,7 @@ def confirm_email(user_id):
     conn.commit()
     conn.close()
 
-# ------------------------------
-# Code handlers (2FA / confirming email)
-# ------------------------------
+# code handlers (2FA / confirming email)
 def add_code(user_id, code, minutes_valid=5):
     expires_at = datetime.now() + timedelta(minutes=minutes_valid)
     conn = sqlite3.connect(DB_NAME)
@@ -117,10 +119,7 @@ def get_latest_code(user_id):
     conn.close()
     return row  # (code, expires_at)
 
-
-# ------------------------------
-# Session managing
-# ------------------------------
+# session managing
 def create_session(user_id, access_token, refresh_token, minutes_valid=30):
     created_at = datetime.now()
     expires_at = created_at + timedelta(minutes=minutes_valid)

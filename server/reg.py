@@ -11,9 +11,7 @@ from handlers.token_utils import generate_access_token, generate_refresh_token
 
 router = APIRouter()
 
-# ------------------------------
-# Registration data model
-# ------------------------------
+# registration data model
 class RegisterData(BaseModel):
     username: str
     password: str
@@ -21,9 +19,7 @@ class RegisterData(BaseModel):
     email: EmailStr
 
 
-# ------------------------------
-# Register
-# ------------------------------
+# register
 @router.post("/register")
 def register(data: RegisterData):
     if exists_username(data.username):
@@ -47,9 +43,7 @@ def register(data: RegisterData):
     }
 
 
-# ------------------------------
-# Confirming email
-# ------------------------------
+# confirming email
 @router.post("/confirm_email")
 def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
     user = get_user_by_username(username)
@@ -70,10 +64,7 @@ def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
     confirm_email(user_id)
     return {"status": "ok", "message": "Email has been confirmed!"}
 
-
-# ------------------------------
-# Login
-# ------------------------------
+# login
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
     user = get_user_by_username(username)
@@ -101,6 +92,7 @@ def login(username: str = Form(...), password: str = Form(...)):
         "username": username
     }
 
+# loging in by using session token
 @router.post("/login_by_token")
 def login_by_token(access_token: str = Form(...), refresh_token: str = Form(...)):
     session = get_session_by_access(access_token)
@@ -135,10 +127,22 @@ def login_by_token(access_token: str = Form(...), refresh_token: str = Form(...)
 
     raise HTTPException(401, "Invalid tokens. Log in again please")
 
+# add public key to db
+@router.post("/add_public_key")
+def add_public_key(username: str = Form(...), public_key: str = Form(...)):
+    user = get_user_by_username(username)
+    if not user:
+        raise HTTPException(400, "User not found")
 
-# ------------------------------
-# Verify 2FA + JWT
-# ------------------------------
+    user_id = user[0]
+    success = add_public_to_user(user_id, public_key)
+    if not success:
+        raise HTTPException(500, "Failed to save public key")
+
+    return {"status": "ok", "message": "Public key saved successfully"}
+
+
+# verify 2FA + JWT (in development)
 @router.post("/verify_2fa")
 def verify_2fa(username: str = Form(...), code: str = Form(...)):
     user = get_user_by_username(username)

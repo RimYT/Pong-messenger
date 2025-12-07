@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //asking for get_accounts permission
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
                 != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
         btnReconnect = findViewById(R.id.btnReconnect);
         prefs = new Prefs(this);
 
+        //if we dont have ip - show ip enter dialog
         if (prefs.getServerIp() == null) {
             showIpDialog();
         } else {
@@ -83,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 CheckIP.pongIP(this, prefs, ip, success -> {
                     if (success) {
                         dialog.dismiss();
+                        checkSavedAccount();
                     }
                 });
             } else {
@@ -92,7 +95,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkSavedAccount() {
+        //getting saved account
         Account saved = AccountHandler.getSavedAccount(this);
+
+        //if we dont have saved account - open register screen
         if (saved == null) {
             openRegisterScreen();
             return;
@@ -100,10 +106,12 @@ public class MainActivity extends AppCompatActivity {
 
         AccountManager am = AccountManager.get(this);
 
+        //getting account data
         String access = am.peekAuthToken(saved, "access");
         String refresh = am.getUserData(saved, "refresh");
         String savedIp = am.getUserData(saved, "server_ip");
 
+        //checking ip (cuz user could change it)
         if (savedIp == null || !savedIp.equals(prefs.getServerIp())) {
             openRegisterScreen();
             return;
@@ -111,18 +119,22 @@ public class MainActivity extends AppCompatActivity {
 
         ApiService api = RetrofitClient.getClient(prefs.getServerIp()).create(ApiService.class);
 
+        //sending login by token request to server
         api.loginByToken(access, refresh).enqueue(new Callback<LoginServerResponse>() {
             @Override
             public void onResponse(Call<LoginServerResponse> call, Response<LoginServerResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    //if server said that all ok - go to main app
                     goToMainApp();
                 } else {
                     try {
+                        //printing error message
                         String errorBody = response.errorBody().string();
                         JSONObject json = new JSONObject(errorBody);
                         String detail = json.optString("detail", "Unknown error");
                         Toast.makeText(MainActivity.this, detail, Toast.LENGTH_LONG).show();
 
+                        //401 - unauthorized
                         if (response.code() == 401) {
                             AccountHandler.deleteAccount(MainActivity.this, saved);
                         }

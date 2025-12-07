@@ -14,7 +14,6 @@ import java.util.function.Consumer;
 
 public class CheckIP {
     static ApiService api;
-    static Prefs prefs;
 
     public static void pongIP(Context context, Prefs prefs, String ip, Consumer<Boolean> callback) {
         Retrofit retrofit = RetrofitClient.getClient(ip);
@@ -35,25 +34,19 @@ public class CheckIP {
                         prefs.setServerIp(ip);
                         Toast.makeText(context, "Pong! IP updated", Toast.LENGTH_SHORT).show();
 
-                        callback.accept(true);   // ← возвращаем true
+                        callback.accept(true);
                         return;
                     }
                 }
 
-                Toast.makeText(context,
-                        "Looks like this server doesn't support Pong!",
-                        Toast.LENGTH_SHORT).show();
-
-                callback.accept(false);          // ← возвращаем false
+                Toast.makeText(context, "Looks like this server doesn't support Pong!", Toast.LENGTH_SHORT).show();
+                callback.accept(false);
             }
 
             @Override
             public void onFailure(Call<ServerResponse> call, Throwable t) {
 
-                Toast.makeText(context,
-                        "Can't connect to server",
-                        Toast.LENGTH_LONG).show();
-
+                Toast.makeText(context, "Can't connect to server", Toast.LENGTH_LONG).show();
                 callback.accept(false);
             }
         });

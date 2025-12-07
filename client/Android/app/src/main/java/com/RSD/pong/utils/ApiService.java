@@ -25,4 +25,8 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("/login")
     Call<LoginServerResponse> login(@Field("username") String username, @Field("password") String password);
+
+    @FormUrlEncoded
+    @POST("/add_public_key")
+    Call<ServerResponse> addPublicKey(@Field("username") String username, @Field("public_key") String publicKey);
 }

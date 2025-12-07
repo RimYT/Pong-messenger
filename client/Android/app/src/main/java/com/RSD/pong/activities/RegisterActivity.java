@@ -94,9 +94,11 @@ public class RegisterActivity extends AppCompatActivity {
                     ServerResponse body = response.body();
 
                     try {
+                        //getting tokens
                         String accessToken = body.access_token;
                         String refreshToken = body.refresh_token;
 
+                        //creating account
                         AccountHandler.createAccount(RegisterActivity.this, inputUsername.getText().toString(),
                                 accessToken, refreshToken);
 
@@ -110,6 +112,7 @@ public class RegisterActivity extends AppCompatActivity {
 
                 } else {
                     try {
+                        //print error message
                         String errorBody = response.errorBody().string();
                         JSONObject json = new JSONObject(errorBody);
                         String detail = json.optString("detail", "Unknown error");
@@ -133,9 +136,7 @@ public class RegisterActivity extends AppCompatActivity {
         Toast.makeText(this, "Register successful!", Toast.LENGTH_SHORT).show();
     }
 
-    // ------------------------------
-    // IP input
-    // ------------------------------
+    //IP input
     private void reInputIp() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Enter server IP");
