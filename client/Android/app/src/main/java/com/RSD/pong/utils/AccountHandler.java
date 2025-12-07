@@ -13,7 +13,7 @@ public class AccountHandler {
         Account account = new Account(username, "com.RSD.pong.account");
 
         Account existing = getSavedAccount(activity);
-        if (existing != null) return;
+        if (existing != null) deleteAccount(activity, existing);
 
         accountManager.addAccountExplicitly(account, null, null);
         accountManager.setAuthToken(account, "access", accessToken);

@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.util.Log;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -34,6 +35,8 @@ public class MainActivity extends AppCompatActivity {
 
     Prefs prefs;
 
+    Button btnReconnect;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                     101);
         }
 
+        btnReconnect = findViewById(R.id.btnReconnect);
         prefs = new Prefs(this);
 
         if (prefs.getServerIp() == null) {
@@ -53,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
         } else {
             checkSavedAccount();
         }
+
+        btnReconnect.setOnClickListener(v -> checkSavedAccount());
     }
 
     private void showIpDialog() {
@@ -130,7 +136,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Call<LoginServerResponse> call, Throwable t) {
                 Toast.makeText(MainActivity.this, "Can't connect to server", Toast.LENGTH_SHORT).show();
-                openRegisterScreen();
             }
         });
     }

@@ -23,97 +23,94 @@ import android.app.AlertDialog;
 
 import org.json.JSONObject;
 
+import com.RSD.pong.LoginServerResponse;
 import com.RSD.pong.R;
-import com.RSD.pong.RegisterData;
-import com.RSD.pong.ServerResponse;
 import com.RSD.pong.utils.AccountHandler;
 import com.RSD.pong.utils.ApiService;
 import com.RSD.pong.utils.Prefs;
 import com.RSD.pong.utils.RetrofitClient;
 import com.RSD.pong.utils.CheckIP;
 
-public class RegisterActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity {
 
-    EditText inputNickname, inputUsername, inputPassword, inputEmail;
-    Button btnRegister, btnReInputIp;
-    TextView loginText;
+    EditText inputUsername, inputPassword;
+    Button btnLogin, btnReInputIp;
+    TextView regText;
     Prefs prefs;
     ApiService api;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_login);
 
         prefs = new Prefs(this);
 
-        inputNickname = findViewById(R.id.inputNickname);
         inputUsername = findViewById(R.id.inputUsername);
         inputPassword = findViewById(R.id.inputPassword);
-        inputEmail    = findViewById(R.id.inputEmail);
-        btnRegister   = findViewById(R.id.btnRegister);
-        btnReInputIp  = findViewById(R.id.btnReInputIp);
+        btnLogin     = findViewById(R.id.btnLogin);
+        btnReInputIp = findViewById(R.id.btnReInputIp);
 
-        loginText = findViewById(R.id.loginText);
+        regText = findViewById(R.id.regText);
 
         String serverIp = prefs.getServerIp();
         Retrofit retrofit = RetrofitClient.getClient(serverIp);
         api = retrofit.create(ApiService.class);
 
-        btnRegister.setOnClickListener(v -> registerUser());
+        btnLogin.setOnClickListener(v -> loginUser());
         btnReInputIp.setOnClickListener(v -> reInputIp());
 
-        // creating link to LoginActivity to login text
-        String txt = loginText.getText().toString();
+        // creating link to RegisterActivity to reg text
+        String txt = regText.getText().toString();
         SpannableString span = new SpannableString(txt);
         span.setSpan(new ClickableSpan() {
             @Override
             public void onClick(View widget) {
-                startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                startActivity(new Intent(LoginActivity.this, RegisterActivity.class));
                 finish();
             }
-        }, txt.length() - 6, txt.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }, txt.length() - 9, txt.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-        loginText.setText(span);
-        loginText.setMovementMethod(LinkMovementMethod.getInstance());
+        regText.setText(span);
+        regText.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private void registerUser() {
+    private void loginUser() {
 
-        RegisterData data = new RegisterData(
-                inputUsername.getText().toString(),
-                inputPassword.getText().toString(),
-                inputNickname.getText().toString(),
-                inputEmail.getText().toString()
-        );
+        String username = inputUsername.getText().toString();
+        String password = inputPassword.getText().toString();
 
-        api.register(data).enqueue(new Callback<ServerResponse>() {
+        api.login(username, password).enqueue(new Callback<LoginServerResponse>() {
             @Override
-            public void onResponse(Call<ServerResponse> call, Response<ServerResponse> response) {
+            public void onResponse(Call<LoginServerResponse> call, Response<LoginServerResponse> response) {
                 if (response.isSuccessful() && response.body() != null) {
-                    ServerResponse body = response.body();
+                    LoginServerResponse body = response.body();
 
                     try {
-                        String accessToken = body.access_token;
-                        String refreshToken = body.refresh_token;
+                        String access = body.access_token;
+                        String refresh = body.refresh_token;
 
-                        AccountHandler.createAccount(RegisterActivity.this, inputUsername.getText().toString(),
-                                accessToken, refreshToken);
+                        AccountHandler.createAccount(
+                                LoginActivity.this,
+                                username,
+                                access,
+                                refresh
+                        );
 
-                        Toast.makeText(RegisterActivity.this, body.message, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, body.message, Toast.LENGTH_LONG).show();
                         goToMainApp();
 
                     } catch (Exception e) {
-                        Toast.makeText(RegisterActivity.this,
+                        Toast.makeText(LoginActivity.this,
                                 "Token parsing error", Toast.LENGTH_LONG).show();
                     }
 
                 } else {
                     try {
-                        String errorBody = response.errorBody().string();
-                        JSONObject json = new JSONObject(errorBody);
+                        String err = response.errorBody().string();
+                        JSONObject json = new JSONObject(err);
                         String detail = json.optString("detail", "Unknown error");
-                        Toast.makeText(RegisterActivity.this, detail, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, detail, Toast.LENGTH_LONG).show();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -121,16 +118,16 @@ public class RegisterActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onFailure(Call<ServerResponse> call, Throwable t) {
-                Toast.makeText(RegisterActivity.this,
+            public void onFailure(Call<LoginServerResponse> call, Throwable t) {
+                Toast.makeText(LoginActivity.this,
                         "Can't connect to server", Toast.LENGTH_LONG).show();
             }
         });
     }
 
     private void goToMainApp() {
-        // TODO: переход в основной экран приложения
-        Toast.makeText(this, "Register successful!", Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
+        // TODO: переход в основной экран
     }
 
     // ------------------------------
@@ -145,8 +142,6 @@ public class RegisterActivity extends AppCompatActivity {
         input.setText(prefs.getServerIp());
         builder.setView(input);
 
-        builder.setCancelable(true);
-
         builder.setPositiveButton("OK", null);
 
         AlertDialog dialog = builder.create();
@@ -156,13 +151,11 @@ public class RegisterActivity extends AppCompatActivity {
             String ip = input.getText().toString().trim();
 
             if (CheckIP.isValidIp(ip)) {
-                CheckIP.pongIP(RegisterActivity.this, prefs, ip, success -> {
-                    if (success) {
-                        dialog.dismiss();
-                    }
+                CheckIP.pongIP(LoginActivity.this, prefs, ip, success -> {
+                    if (success) dialog.dismiss();
                 });
             } else {
-                Toast.makeText(RegisterActivity.this, "Invalid IP", Toast.LENGTH_SHORT).show();
+                Toast.makeText(LoginActivity.this, "Invalid IP", Toast.LENGTH_SHORT).show();
             }
         });
     }

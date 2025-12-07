@@ -21,4 +21,8 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("login_by_token")
     Call<LoginServerResponse> loginByToken(@Field("access_token") String access, @Field("refresh_token") String refresh);
+
+    @FormUrlEncoded
+    @POST("/login")
+    Call<LoginServerResponse> login(@Field("username") String username, @Field("password") String password);
 }
