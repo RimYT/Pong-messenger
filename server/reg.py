@@ -2,14 +2,14 @@ from fastapi import APIRouter, FastAPI, HTTPException, Form
 from pydantic import BaseModel, EmailStr
 from passlib.hash import bcrypt_sha256
 from datetime import datetime
-from db import init_db, add_user, get_user_by_username, exists_username, exists_email, confirm_email, add_code, get_latest_code
+from db import *
 from handlers.email_handler import send_email, generate_code
 
 import jwt
 from __init__ import SERVER_PRIVATE_KEY, SERVER_PUBLIC_KEY_PEM
+from handlers.token_utils import generate_access_token, generate_refresh_token
 
 router = APIRouter()
-init_db()
 
 # ------------------------------
 # Registration data model
@@ -22,7 +22,7 @@ class RegisterData(BaseModel):
 
 
 # ------------------------------
-# Register endpoint with JWT + public key
+# Register
 # ------------------------------
 @router.post("/register")
 def register(data: RegisterData):
@@ -34,19 +34,16 @@ def register(data: RegisterData):
     pass_hash = bcrypt_sha256.hash(data.password)
     user_id = add_user(data.username, pass_hash, data.nickname, data.email)
 
-    # Create signed JWT token
-    token_payload = {
-        "user_id": user_id,
-        "username": data.username,
-        "iat": datetime.utcnow().timestamp()
-    }
-    token = jwt.encode(token_payload, SERVER_PRIVATE_KEY, algorithm="RS256")
+    access_token = generate_access_token()
+    refresh_token = generate_refresh_token()
+
+    create_session(user_id, access_token, refresh_token)
 
     return {
         "status": "ok",
         "message": "Registration successful! Check your email to confirm it!",
-        "token": token,
-        "public_key": SERVER_PUBLIC_KEY_PEM
+        "access_token": access_token,
+        "refresh_token": refresh_token
     }
 
 
@@ -75,33 +72,68 @@ def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
 
 
 # ------------------------------
-# Login + JWT
+# Login
 # ------------------------------
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
     user = get_user_by_username(username)
     if not user:
         raise HTTPException(400, "User not found")
+
     user_id, pass_hash, email_confirmed, email = user
 
     if not bcrypt_sha256.verify(password, pass_hash):
         raise HTTPException(400, "Invalid password")
+
     # if not email_confirmed:
     #    raise HTTPException(400, "Email is not confirmed")
 
-    token_payload = {
-        "user_id": user_id,
-        "username": username,
-        "iat": datetime.utcnow().timestamp()
-    }
-    token = jwt.encode(token_payload, SERVER_PRIVATE_KEY, algorithm="RS256")
+    access_token = generate_access_token()
+    refresh_token = generate_refresh_token()
+
+    create_session(user_id, access_token, refresh_token)
 
     return {
         "status": "ok",
-        "message": "You have been logged in",
-        "token": token,
-        "public_key": SERVER_PUBLIC_KEY_PEM
+        "message": "You've logged in!",
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "username": username
     }
+
+@router.post("/login_by_token")
+def login_by_token(access_token: str = Form(...), refresh_token: str = Form(...)):
+    session = get_session_by_access(access_token)
+
+    if session:
+        user_id, username = session[1], session[2]
+        return {
+            "status": "ok",
+            "message": "Logged in with access token",
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "username": username
+        }
+
+    session = get_session_by_refresh(refresh_token)
+
+    if session:
+        session_id, user_id, username = session[0], session[1], session[2]
+
+        new_access = generate_access_token()
+        new_refresh = generate_refresh_token()
+
+        update_session_tokens(session_id, new_access, new_refresh)
+
+        return {
+            "status": "ok",
+            "message": "Tokens refreshed",
+            "access_token": new_access,
+            "refresh_token": new_refresh,
+            "username": username
+        }
+
+    raise HTTPException(401, "Invalid tokens. Log in again please")
 
 
 # ------------------------------

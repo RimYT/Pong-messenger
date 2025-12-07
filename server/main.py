@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from reg import router as reg_router
 
 from __init__ import SERVER_PUBLIC_KEY_PEM
+from db import init_db
+
+init_db()
 
 app = FastAPI()
 

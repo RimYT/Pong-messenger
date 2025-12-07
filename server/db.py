@@ -26,6 +26,17 @@ def init_db():
         expires_at DATETIME
     )
     """)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS sessions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        access_token TEXT,
+        refresh_token TEXT,
+        created_at DATETIME,
+        expires_at DATETIME,
+        FOREIGN KEY(user_id) REFERENCES users(id)
+    )
+    """)
     conn.commit()
     conn.close()
 
@@ -105,3 +116,66 @@ def get_latest_code(user_id):
     row = cur.fetchone()
     conn.close()
     return row  # (code, expires_at)
+
+
+# ------------------------------
+# Session managing
+# ------------------------------
+def create_session(user_id, access_token, refresh_token, minutes_valid=30):
+    created_at = datetime.now()
+    expires_at = created_at + timedelta(minutes=minutes_valid)
+
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+    INSERT INTO sessions (user_id, access_token, refresh_token, created_at, expires_at)
+    VALUES (?, ?, ?, ?, ?)
+    """, (user_id, access_token, refresh_token, created_at, expires_at))
+
+    session_id = cur.lastrowid
+    conn.commit()
+    conn.close()
+
+    return session_id
+
+def get_session_by_access(access_token):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+    SELECT id, user_id, access_token, refresh_token, created_at, expires_at
+    FROM sessions
+    WHERE access_token = ?
+    """, (access_token,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def get_session_by_refresh(refresh_token):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+    SELECT id, user_id, access_token, refresh_token, created_at, expires_at
+    FROM sessions
+    WHERE refresh_token = ?
+    """, (refresh_token,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def update_session_tokens(session_id, new_access, new_refresh):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE sessions
+        SET access_token=?, refresh_token=?, created_at=?
+        WHERE id=?
+    """, (new_access, new_refresh, datetime.now(), session_id))
+    conn.commit()
+    conn.close()
+
+def delete_sessions_for_user(user_id):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
