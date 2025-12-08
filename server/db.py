@@ -1,4 +1,5 @@
 import sqlite3
+import uuid
 from datetime import datetime, timedelta
 
 DB_NAME = "users.db"
@@ -36,6 +37,16 @@ def init_db():
         FOREIGN KEY(user_id) REFERENCES users(id)
     )
     """)
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS messages (
+            id TEXT PRIMARY KEY,
+            recipient INTEGER,
+            sender INTEGER,
+            ciphertext TEXT,
+            status TEXT, -- new / delivered / read
+            created_at DATETIME
+        )
+        """)
     conn.commit()
     conn.close()
 
@@ -69,7 +80,7 @@ def add_public_to_user(user_id: int, public_key: str) -> bool:
 def get_user_by_username(username):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
-    cur.execute("SELECT id, pass_hash, email_confirmed, email FROM users WHERE username = ?", (username,))
+    cur.execute("SELECT id, pass_hash, public_key, email_confirmed, email FROM users WHERE username = ?", (username,))
     row = cur.fetchone()
     conn.close()
     return row  # (id, pass_hash, email_confirmed, email)
@@ -176,5 +187,48 @@ def delete_sessions_for_user(user_id):
     conn = sqlite3.connect(DB_NAME)
     cur = conn.cursor()
     cur.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+    conn.commit()
+    conn.close()
+
+
+# MESSAGE UTILS
+
+def add_message(recipient_id: int, sender_id: int, ciphertext: str, msg_id: str = None):
+    if msg_id is None:
+        msg_id = str(uuid.uuid4())
+    created_at = datetime.now()
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO messages (id, recipient, sender, ciphertext, status, created_at)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (msg_id, recipient_id, sender_id, ciphertext, "new", created_at))
+    conn.commit()
+    conn.close()
+    return msg_id
+
+def fetch_new_messages_for_user(user_id: int):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT id, sender, ciphertext, created_at FROM messages
+        WHERE recipient = ? AND status = 'new'
+        ORDER BY created_at ASC
+    """, (user_id,))
+    rows = cur.fetchall()
+    conn.close()
+    return [{"id": r[0], "sender": r[1], "ciphertext": r[2], "created_at": r[3]} for r in rows]
+
+def mark_message_delivered(message_id: str):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("UPDATE messages SET status = 'delivered' WHERE id = ?", (message_id,))
+    conn.commit()
+    conn.close()
+
+def delete_message(message_id: str):
+    conn = sqlite3.connect(DB_NAME)
+    cur = conn.cursor()
+    cur.execute("DELETE FROM messages WHERE id = ?", (message_id,))
     conn.commit()
     conn.close()
