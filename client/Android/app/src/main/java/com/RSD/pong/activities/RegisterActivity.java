@@ -132,8 +132,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void goToMainApp() {
-        // TODO: переход в основной экран приложения
-        Toast.makeText(this, "Register successful!", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, AppActivity.class));
+        finish();
     }
 
     //IP input

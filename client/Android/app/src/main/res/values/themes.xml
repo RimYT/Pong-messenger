@@ -6,6 +6,9 @@
         <item name="android:statusBarColor">#000000</item>
         <item name="colorPrimary">#FFFFFF</item>
         <item name="colorSecondary">#000000</item>
+
+        <item name="colorPrimaryVariant">#CDCDCD</item>
+        <item name="colorSecondaryVariant">#FFFFFF</item>
     </style>
 
     <style name="Theme.Pong" parent="Base.Theme.Pong" />

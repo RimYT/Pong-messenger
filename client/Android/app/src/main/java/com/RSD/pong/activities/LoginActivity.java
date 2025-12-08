@@ -129,8 +129,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToMainApp() {
-        Toast.makeText(this, "Login successful!", Toast.LENGTH_SHORT).show();
-        // TODO: переход в основной экран
+        startActivity(new Intent(this, AppActivity.class));
+        finish();
     }
 
     //IP input

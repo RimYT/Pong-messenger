@@ -152,7 +152,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void goToMainApp() {
-        Toast.makeText(this, "Register successful!", Toast.LENGTH_SHORT).show();
+        startActivity(new Intent(this, AppActivity.class));
+        finish();
     }
 
     private void openRegisterScreen() {
