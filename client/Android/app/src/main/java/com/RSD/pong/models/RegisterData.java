@@ -1,4 +1,4 @@
-package com.RSD.pong;
+package com.RSD.pong.models;
 
 public class RegisterData {
     public String username;

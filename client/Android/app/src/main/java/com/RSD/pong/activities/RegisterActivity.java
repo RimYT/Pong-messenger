@@ -24,8 +24,8 @@ import android.app.AlertDialog;
 import org.json.JSONObject;
 
 import com.RSD.pong.R;
-import com.RSD.pong.RegisterData;
-import com.RSD.pong.ServerResponse;
+import com.RSD.pong.models.RegisterData;
+import com.RSD.pong.models.ServerResponse;
 import com.RSD.pong.utils.AccountHandler;
 import com.RSD.pong.utils.ApiService;
 import com.RSD.pong.utils.Prefs;

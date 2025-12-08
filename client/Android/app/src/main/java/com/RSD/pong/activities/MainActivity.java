@@ -16,12 +16,11 @@ import androidx.core.content.ContextCompat;
 
 import android.app.AlertDialog;
 import android.content.Intent;
-import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.RSD.pong.LoginServerResponse;
+import com.RSD.pong.models.LoginServerResponse;
 import com.RSD.pong.R;
 import com.RSD.pong.utils.AccountHandler;
 import com.RSD.pong.utils.ApiService;

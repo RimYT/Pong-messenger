@@ -1,8 +1,8 @@
 package com.RSD.pong.utils;
 
-import com.RSD.pong.LoginServerResponse;
-import com.RSD.pong.RegisterData;
-import com.RSD.pong.ServerResponse;
+import com.RSD.pong.models.LoginServerResponse;
+import com.RSD.pong.models.RegisterData;
+import com.RSD.pong.models.ServerResponse;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

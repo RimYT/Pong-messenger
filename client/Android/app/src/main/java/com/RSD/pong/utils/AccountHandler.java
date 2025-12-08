@@ -6,7 +6,7 @@ import android.app.Activity;
 import android.util.Base64;
 import android.util.Log;
 
-import com.RSD.pong.ServerResponse;
+import com.RSD.pong.models.ServerResponse;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -28,7 +28,7 @@ public class AccountHandler {
         Account existing = getSavedAccount(activity);
         if (existing != null) deleteAccount(activity, existing);
 
-        //saving a some amount of data
+        //saving some amount of data
         accountManager.addAccountExplicitly(account, null, null);
         accountManager.setAuthToken(account, "access", accessToken);
         accountManager.setUserData(account, "refresh", refreshToken);
@@ -55,14 +55,12 @@ public class AccountHandler {
     //saving private key
     private static void savePrivateKey(Activity activity, Account account, PrivateKey privateKey) {
         String privateKeyStr = Base64.encodeToString(privateKey.getEncoded(), Base64.DEFAULT);
-        Log.d("AccApp", privateKeyStr);
         AccountManager accountManager = AccountManager.get(activity);
         accountManager.setUserData(account, "private_key", privateKeyStr);
     }
     //sending public key to server (isnt that obvious??)
     private static void sendPublicKeyToServer(String username, PublicKey publicKey, String serverIp) {
         String publicKeyStr = Base64.encodeToString(publicKey.getEncoded(), Base64.DEFAULT);
-        Log.d("AccApp", publicKeyStr);
         Retrofit retrofit = RetrofitClient.getClient(serverIp);
         ApiService api = retrofit.create(ApiService.class);
 

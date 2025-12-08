@@ -23,7 +23,7 @@ import android.app.AlertDialog;
 
 import org.json.JSONObject;
 
-import com.RSD.pong.LoginServerResponse;
+import com.RSD.pong.models.LoginServerResponse;
 import com.RSD.pong.R;
 import com.RSD.pong.utils.AccountHandler;
 import com.RSD.pong.utils.ApiService;

@@ -3,7 +3,7 @@ package com.RSD.pong.utils;
 import android.content.Context;
 import android.widget.Toast;
 
-import com.RSD.pong.ServerResponse;
+import com.RSD.pong.models.ServerResponse;
 
 import retrofit2.Call;
 import retrofit2.Callback;
