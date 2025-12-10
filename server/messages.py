@@ -1,4 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from typing import Dict, List
+
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
 from pydantic import BaseModel
 from datetime import datetime
 from db import (
@@ -32,6 +34,8 @@ def send_message(req: SendReq):
 
     msg_id = add_message(recipient_id, sender_id, req.ciphertext)
 
+    notify_user(int(req.recipient_username), {"messages": "new_msg"})
+
     return {"status": "ok", "message_id": msg_id}
 
 @router.get("/messages/fetch")
@@ -63,3 +67,27 @@ def get_keys(username: str):
         raise HTTPException(404, "User not found")
     public_key = user[2]
     return {"username": username, "public_key": public_key}
+
+
+# websocket (for reminding user that he's got new message)
+active_connections: Dict[int, List[WebSocket]] = {}  # user_id -> list of websockets
+
+@router.websocket("/ws/messages")
+async def websocket_endpoint(websocket: WebSocket, access_token: str):
+    user_id = check_access_token(access_token)
+    await websocket.accept()
+    if user_id not in active_connections:
+        active_connections[user_id] = []
+    active_connections[user_id].append(websocket)
+
+    try:
+        while True:
+            data = await websocket.receive_text()
+    except WebSocketDisconnect:
+        active_connections[user_id].remove(websocket)
+
+
+async def notify_user(recipient_id: int, msg):
+    if recipient_id in active_connections:
+        for ws in active_connections[recipient_id]:
+            await ws.send_json(msg)

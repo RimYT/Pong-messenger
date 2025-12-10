@@ -63,7 +63,7 @@ def confirm_email_endpoint(username: str = Form(...), code: str = Form(...)):
 
     confirm_email(user_id)
     return {"status": "ok", "message": "Email has been confirmed!"}
-''
+
 # login
 @router.post("/login")
 def login(username: str = Form(...), password: str = Form(...)):
