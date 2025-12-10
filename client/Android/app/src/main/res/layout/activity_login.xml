@@ -13,9 +13,10 @@
         android:layout_marginTop="9dp"
         android:gravity="center"
         android:text="You're new here? Then register!"
+        android:fontFamily="@font/vcr_osd"
         android:textColor="?attr/colorSecondary"
         android:textColorLink="#0022FF"
-        android:textSize="16sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -35,25 +36,29 @@
         android:id="@+id/textViewTitle"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="44dp"
+        android:fontFamily="@font/press_start"
+        android:gravity="center"
         android:text="Pong! Login"
         android:textColor="?attr/colorSecondary"
-        android:textSize="40sp"
-        android:gravity="center"
-        app:layout_constraintTop_toBottomOf="@+id/imageView"
+        android:textSize="28sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <EditText
         android:id="@+id/inputUsername"
         android:layout_width="match_parent"
         android:layout_height="45dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="4dp"
         android:backgroundTint="?attr/colorSecondary"
         android:hint="Username"
+        android:fontFamily="@font/vcr_osd"
         android:textColorHint="?attr/colorSecondary"
-        app:layout_constraintTop_toBottomOf="@+id/textViewTitle"
-        tools:layout_editor_absoluteX="20dp" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textViewTitle" />
 
     <EditText
         android:id="@+id/inputPassword"
@@ -62,6 +67,7 @@
         android:layout_marginTop="8dp"
         android:backgroundTint="?attr/colorSecondary"
         android:hint="Password"
+        android:fontFamily="@font/vcr_osd"
         android:inputType="textPassword"
         android:textColorHint="?attr/colorSecondary"
         app:layout_constraintTop_toBottomOf="@+id/inputUsername" />
@@ -72,6 +78,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:text="Login"
+        android:textSize="17sp"
+        android:fontFamily="@font/vcr_osd"
         android:backgroundTint="?attr/colorSecondary"
         android:textColor="?attr/colorPrimary"
         app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
@@ -82,6 +90,8 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Re-input server IP"
+        android:fontFamily="@font/vcr_osd"
+        android:textSize="17sp"
         android:backgroundTint="?attr/colorSecondary"
         android:textColor="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent" />

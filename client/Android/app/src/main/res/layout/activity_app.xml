@@ -19,13 +19,12 @@
             android:paddingStart="60dp"
             android:text="Pong! Messenger"
             android:textColor="?attr/colorSecondary"
-            android:textSize="28sp"
-            android:fontFamily="sans-serif-medium"
+            android:textSize="20sp"
+            android:fontFamily="@font/press_start"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
 
-        <!-- Кнопка "больше" -->
         <ImageButton
             android:id="@+id/btnMenu"
             android:layout_width="40dp"
@@ -50,7 +49,6 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Боковая панель -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/navView"
         android:layout_width="250dp"
